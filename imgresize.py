@@ -4,11 +4,13 @@ import win32api
 
 MAXSIZE=800 #pixel
 curdir=os.getcwd()
-# confirmation=win32api.MessageBox(0, 'All images in directory "'+curdir+'" might be resized to 800px maximum width or height!', 'Image Resicer', 0x00001031)
+# confirmation=win32api.MessageBox(0, 'All images in directory "'+curdir+'" might be resized to 800px maximum width or height!', 'Image Resizer', 0x00001031)
 confirmation=1 # since saving reduced copies there is no further need of user confirmation
 if confirmation==1: #ok-button
 	dir=os.listdir(curdir)
 	for file in dir:
+		if file.find('.')<1:
+			continue
 		name=file[0:file.rindex('.')]
 		extension=file[file.rindex('.'):].lower()
 		if extension in ('.jpg','.png'):
