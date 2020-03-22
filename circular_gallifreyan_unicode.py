@@ -54,11 +54,11 @@ def sign(char):
 	elif char == "d":
 		return "ᘯ ∴"
 	elif char == "g":
-		return "ᘯ𝄖"
+		return "ᘯ-"
 	elif char == "h":
-		return "ᘯ𝄗"
+		return "ᘯ="
 	elif char == "f":
-		return "ᘯ𝄘"
+		return "ᘯ≡"
 	#j-stem
 	elif char == "j":
 		return "⍜"
@@ -69,11 +69,11 @@ def sign(char):
 	elif char == "l":
 		return "⍜ ∴"
 	elif char == "n":
-		return "⍜𝄖"
+		return "⍜-"
 	elif char == "p":
-		return "⍜𝄗"
+		return "⍜="
 	elif char == "m":
-		return "⍜𝄘"
+		return "⍜≡"
 	#t-stem
 	elif char == "t":
 		return "⁔"
@@ -84,31 +84,31 @@ def sign(char):
 	elif char == "r":
 		return "⁔∴"
 	elif char == "v":
-		return "⁔𝄖"
+		return "⁔-"
 	elif char == "w":
-		return "⁔𝄗"
+		return "⁔="
 	elif char == "s":
-		return "⁔𝄘"
+		return "⁔≡"
 	#th-stem
 	elif char == "th":
-		return "⦵"
+		return "⊖"
 	elif char == "gh":
-		return "⦵ ⋅"
+		return "⊖ ⋅"
 	elif char == "y":
-		return "⦵ ∶"
+		return "⊖ ∶"
 	elif char == "z":
-		return "⦵ ∴"
+		return "⊖ ∴"
 	elif char == "qu":
-		return "⦵𝄖"
+		return "⊖ -"
 	elif char == "x":
-		return "⦵𝄗"
+		return "⊖ ="
 	elif char == "ng":
-		return "⦵𝄘"
+		return "⊖ ≡"
 	#c and q have their representation in names only. they are not used widely and will be replaced mostly.
 	elif char == "c":
 		return "⍜ ∷",
 	elif char == "q":
-		return "⦵∷"
+		return "⊖ ∷"
 	else:
 		return False
 
