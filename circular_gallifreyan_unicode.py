@@ -12,6 +12,8 @@
 # this only gives impressions of character composing
 ################################################################################
 
+import re
+
 preset={
 #sample presets
 	"sample": "coward any day"
@@ -161,10 +163,23 @@ text = input("type single sentence: ")
 if text == "":
 	text = preset["sample"]
 
+cg=""
 for word in characters(text):
 	print (word)
 	for group in word:
 		for letter in group:
 			print (sign(letter), end="")
+			cg+=sign(letter)
 		print ("   ", end="")
+		cg+="   "
 	print ("\n")
+	cg+="   "
+
+print ("reduced whitespace:\n" + re.sub(r"(?<=\S)\s","",cg))
+
+export=input("export to textfile? y/n: ")
+if export.lower()=="y":
+	file=open("cgoutput.txt","w", encoding='UTF8')
+	file.write("ordinary:\n" + cg)
+	file.write("\nreduced whitespace:\n" + re.sub(r"(?<=\S)\s","",cg))
+	file.close()
