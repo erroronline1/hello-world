@@ -10,7 +10,7 @@ inspired by http://www.patorjk.com/software/taag/
 
 python version with cli options by error on line 1 (erroronline.one)
 
-currently lowercase only
+currently lowercase only but with optional linebreak
 
 $ python t2aa.py --help    for overview
 '''
@@ -41,10 +41,13 @@ availablefonts={
 
 import sys
 import re
+import shutil
 
 letterspacing=0
 font='rectangle'
-behaviour=False
+autolinebreak=False
+wordwrap=False
+helpAndQuit=False
 
 def helparg():
     global availablefonts
@@ -52,43 +55,69 @@ def helparg():
     for font in availablefonts:
         samples += 'fontname: ' + font + '\n'
         samples += 'available characters: ' + ''.join([c for c in availablefonts[font]['index']]) + '\n'
-        samples += write(0, font, 'hello world!')
+        samples += write(0, font, 'hello world!', True, True)
     print('''
 usage: t2aa.py [ -h  | --help ]
                [ -f  | --font ] FONTNAME
                [ -ls | --letterspacing] NUMBER
+               [ -lb | --linebreak]
+               [ -ww | --wordwrap]
 
 with font going default if FONTNAME not available and
-letterspacing can not be less than -1
+letterspacing can not be less than -1, not readable otherwise
+linebreak and wordwrap take terminal width into account
 
 extend available font dictionary as desired. currently available:\n
 ''' + samples)
 
-def write(ls, font, string):
+def write(ls, font, string, autolinebreak, wordwrap):
     global availablefonts
-    charlines=[]
+
+    terminalwidth, terminalheight = shutil.get_terminal_size(0)
+
+    # set up result from selected font
+    output = []
+    wrap=0
+    string = string.lower()
+    # separate words by whitespace
+    chunks = re.findall(r'(.+?(?:\s|$))', string)
+
+    for word in chunks:
+        # quick assembly of word length
+        expectablelength=0
+        for char in word:
+            expectablelength += len(availablefonts[font]['lines'][0][availablefonts[font]['index'].index(char)]) + ls
+        if wordwrap and len(output):
+            if len(output[wrap][0]) + expectablelength >= terminalwidth:
+                wrap += 1
+        for char in word:
+            for lineindex, line in enumerate(availablefonts[font]['lines']):
+                if wrap+1 >= len(output):
+                    output.append([''] * len(availablefonts[font]['lines']))
+                # get ascii-letter line
+                append=line[availablefonts[font]['index'].index(char)]
+                # handle letter spacing
+                if len(output[wrap][lineindex]) > 0 and ls < 0:
+                    if append[0] != ' ':
+                        output[wrap][lineindex] = output[wrap][lineindex][:-1]
+                    else:
+                        append=append[1:]
+                elif len(output[wrap][lineindex]) > 0 and ls > 0:
+                        append = ' ' * ls + append
+                # manage linebreaks and wraps
+                if (autolinebreak or wordwrap) and len(''.join(output[wrap][lineindex])) + len(append) >= terminalwidth:
+                    # linebreak on overflow
+                    if autolinebreak:
+                        wrap += 1
+                        output.append([''] * len(availablefonts[font]['lines']))
+                    # append
+                output[wrap][lineindex] += append
+
+    # parse array to output string
     returnstring=''
-    for char in string.lower():
-        for lineindex, line in enumerate(availablefonts[font]['lines']):
-            if lineindex >= len(charlines):
-                charlines.append([])
-            append=line[availablefonts[font]['index'].index(char)]
-
-            # handle letter spacing
-            if len(charlines[lineindex]) > 0 and ls < 0:
-                if append[0] != ' ':
-                    charlines[lineindex][-1] = charlines[lineindex][-1][:-1]
-                else:
-                    append=append[1:]
-            elif len(charlines[lineindex]) > 0 and ls > 0:
-                charlines[lineindex][-1] += ' ' * ls
-
-            charlines[lineindex].append(append)
-
-    for line in charlines:
-        for char in line:
-            returnstring += char
-        returnstring += '\n'
+    for wrap in output:
+        returnstring += '\n'.join(wrap)
+    
     return returnstring
 
 if __name__ == '__main__':
@@ -99,25 +128,33 @@ if __name__ == '__main__':
     options = {
         'h': '--help|-h',
         'ls': '((?:--letterspacing|-ls)[:\\s]+)(-{0,1}\\d+)',
-        'f': '((?:--font|-f)[:\\s]+)([^\\s]+[\\w]+)*'
+        'f': '((?:--font|-f)[:\\s]+)([^\\s]+[\\w]+)*',
+        'lb': '--linebreak|-lb',
+        'ww': '--wordwrap|-ww'
         }
     params = ' '.join(sys.argv) + ' '
     for opt in options:
         arg = re.findall(options[opt], params, re.IGNORECASE)
         if opt == 'h' and arg:
-            behaviour=True
+            helpAndQuit=True
             break
         elif opt == 'ls' and bool(arg):
+            # not less than -1, not readable otherwise
             letterspacing = int(arg[0][1]) if int(arg[0][1]) > -2 else -1
             params=params.replace(''.join(arg[0]), '')
         elif opt == 'f' and bool(arg):
             font = arg[0][1] if arg[0][1] in availablefonts else font
             params=params.replace(''.join(arg[0]), '')
+        elif opt == 'lb' and arg:
+            autolinebreak=True
+            params=params.replace(''.join(arg[0]), '')
+        elif opt == 'ww' and arg:
+            wordwrap=True
+            params=params.replace(''.join(arg[0]), '')
 
-    
     string=params.strip() if len(params.strip()) else 'hello world!'
 
-    if not behaviour:
-        print(write(letterspacing, font, string))
+    if not helpAndQuit:
+        print(write(letterspacing, font, string, autolinebreak, wordwrap))
     else:
         helparg()
