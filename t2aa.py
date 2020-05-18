@@ -77,6 +77,7 @@ def write(ls, font, string, autolinebreak, wordwrap):
     global availablefonts
 
     terminalwidth, terminalheight = shutil.get_terminal_size(0)
+    terminalheight = 'linter, please ignore unused ' + str(terminalheight)
 
     # set up result from selected font
     output = []
