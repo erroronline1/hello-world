@@ -9,8 +9,11 @@ text to ascii-art
 inspired by http://www.patorjk.com/software/taag/
 
 python version with cli options by error on line 1 (erroronline.one)
+offline usable with your favourite font
 
 currently lowercase only but with optional linebreak
+if you want to add uppercase extend the font-dictionaries and change the
+string = string.lower() on line 80something
 
 $ python t2aa.py --help    for overview
 '''
@@ -65,7 +68,7 @@ usage: t2aa.py [ -h  | --help ]
 
 with font going default if FONTNAME not available and
 letterspacing can not be less than -1, not readable otherwise
-linebreak and wordwrap take terminal width into account
+optional linebreak and wordwrap take terminal width into account.
 
 extend available font dictionary as desired. currently available:\n
 ''' + samples)
@@ -83,17 +86,19 @@ def write(ls, font, string, autolinebreak, wordwrap):
     chunks = re.findall(r'(.+?(?:\s|$))', string)
 
     for word in chunks:
-        # quick assembly of word length
+        # quick assembly of word length to handle word wraps
         expectablelength=0
         for char in word:
             expectablelength += len(availablefonts[font]['lines'][0][availablefonts[font]['index'].index(char)]) + ls
         if wordwrap and len(output):
-            if len(output[wrap][0]) + expectablelength >= terminalwidth:
+            if len(output[wrap][-1]) + expectablelength >= terminalwidth:
                 wrap += 1
+        if wrap+1 >= len(output):
+            output.append([''] * len(availablefonts[font]['lines']))
+        # add characters to output...
         for char in word:
+            # ... linewise
             for lineindex, line in enumerate(availablefonts[font]['lines']):
-                if wrap+1 >= len(output):
-                    output.append([''] * len(availablefonts[font]['lines']))
                 # get ascii-letter line
                 append=line[availablefonts[font]['index'].index(char)]
                 # handle letter spacing
@@ -104,19 +109,17 @@ def write(ls, font, string, autolinebreak, wordwrap):
                         append=append[1:]
                 elif len(output[wrap][lineindex]) > 0 and ls > 0:
                         append = ' ' * ls + append
-                # manage linebreaks and wraps
-                if (autolinebreak or wordwrap) and len(''.join(output[wrap][lineindex])) + len(append) >= terminalwidth:
-                    # linebreak on overflow
-                    if autolinebreak:
-                        wrap += 1
-                        output.append([''] * len(availablefonts[font]['lines']))
-                    # append
+                # manage linebreaks
+                if autolinebreak and len(output[wrap][lineindex] + append) >= terminalwidth:
+                    wrap += 1
+                    output.append([''] * len(availablefonts[font]['lines']))
+                # append
                 output[wrap][lineindex] += append
 
     # parse array to output string
     returnstring=''
     for wrap in output:
-        returnstring += '\n'.join(wrap)
+        returnstring += '\n'.join(wrap) + '\n'
     
     return returnstring
 
