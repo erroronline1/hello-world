@@ -14,6 +14,9 @@ def rename(fldr,actn,strng):
             if actn=='s': #strip
                 newname='{0}{1}'.format(name.replace(strng,''),extension)
                 os.rename(fldr+'/'+file,fldr+'/'+newname)
+            if actn=='a': #add
+                newname='{0}{1}{2}'.format(name,strng,extension)
+                os.rename(fldr+'/'+file,fldr+'/'+newname)
             print('file ',file,' renamed to ',newname)
     except Exception as e:
         print(e,': some error occured, mostly because a file with new name already exists. program aborted.')        
@@ -22,7 +25,8 @@ def rename(fldr,actn,strng):
 
 print("""rename all files in specified folder.
 choose if you want to rename all the same (as in file(0).mp3, file(1).mp3, ...)
-or strip parts of filenames (as in file_1_security_copy.mp3, file_2_security_copy.mp3, ...)
+strip parts of filenames (as in file_1_security_copy.mp3, file_2_security_copy.mp3, ...)
+add something before overwriting while copying into folder (as in file_1_a.mp3, file_2_a.mp3, file_3_a.mp3)
 exit every time typing [exit]
 
 all files in the given folder will be renamed regardless of file-type! folders remain untouched.
@@ -40,11 +44,13 @@ else:
         print(file, end='\t\t')
     
     print('\n')
-    action=input('[r]ename or [s]trip part? ')
+    action=input('[r]ename, [s]trip part, [a]dd something? ')
     if action=='r':
         string=input('enter new filename to start renaming immediately: ')
     elif action=='s':
         string=input('enter to be stripped part to start renaming immediately: ')
+    elif action=='a':
+        string=input('enter part to be added to start renaming immediately: ')
     else:
         print('bye...')
         exit()
